@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Copy, Loader2, Play, UsersRound } from "lucide-react";
 import { games } from "@/games/catalog";
 import type { RoomState } from "@/services/rooms";
+
+const roomWorkerUrl =
+  process.env.NEXT_PUBLIC_ROOM_WORKER_URL ?? "https://susnoodle-rooms.ajaimini2.workers.dev";
 
 export function RoomConsole({ defaultGameSlug = "raja-mantri-chor-sipahi" }: { defaultGameSlug?: string }) {
   const playableGames = games.filter((game) => game.status === "playable" && game.modes.includes("online"));
@@ -12,8 +15,51 @@ export function RoomConsole({ defaultGameSlug = "raja-mantri-chor-sipahi" }: { d
   const [joinCode, setJoinCode] = useState("");
   const [joinName, setJoinName] = useState("Guest");
   const [room, setRoom] = useState<RoomState | null>(null);
+  const [realtimeState, setRealtimeState] = useState<"idle" | "connecting" | "connected" | "offline">("idle");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const realtimeUrl = useMemo(() => {
+    if (!room || !roomWorkerUrl) return "";
+    const base = roomWorkerUrl.replace(/^http/, "ws").replace(/\/$/, "");
+    return `${base}/rooms/${room.code}`;
+  }, [room]);
+  const realtimeIdentity = useMemo(() => {
+    if (!room) return null;
+    return {
+      playerId: room.hostId,
+      playerName: room.players.find((player) => player.id === room.hostId)?.name ?? "Host"
+    };
+  }, [room]);
+
+  useEffect(() => {
+    if (!realtimeIdentity || !realtimeUrl) return;
+    const socket = new WebSocket(realtimeUrl);
+    socket.addEventListener("open", () => {
+      setRealtimeState("connected");
+      socket.send(
+        JSON.stringify({
+          type: "sync",
+          playerId: realtimeIdentity.playerId,
+          playerName: realtimeIdentity.playerName
+        })
+      );
+    });
+    socket.addEventListener("message", (event) => {
+      try {
+        const payload = JSON.parse(String(event.data)) as { room?: Partial<RoomState> };
+        if (payload.room?.status) {
+          setRoom((current) => (current ? { ...current, status: payload.room?.status ?? current.status } : current));
+        }
+      } catch {
+        // Ignore malformed realtime pings; the REST state remains authoritative for local dev.
+      }
+    });
+    socket.addEventListener("close", () => setRealtimeState("offline"));
+    socket.addEventListener("error", () => setRealtimeState("offline"));
+    return () => {
+      socket.close();
+    };
+  }, [realtimeIdentity, realtimeUrl]);
 
   async function create() {
     setLoading(true);
@@ -26,6 +72,7 @@ export function RoomConsole({ defaultGameSlug = "raja-mantri-chor-sipahi" }: { d
       });
       const data = (await response.json()) as { room?: RoomState; error?: string };
       if (!response.ok || !data.room) throw new Error(data.error ?? "Could not create room.");
+      setRealtimeState("connecting");
       setRoom(data.room);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not create room.");
@@ -45,6 +92,7 @@ export function RoomConsole({ defaultGameSlug = "raja-mantri-chor-sipahi" }: { d
       });
       const data = (await response.json()) as { room?: RoomState; error?: string };
       if (!response.ok || !data.room) throw new Error(data.error ?? "Could not join room.");
+      setRealtimeState("connecting");
       setRoom(data.room);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not join room.");
@@ -126,6 +174,9 @@ export function RoomConsole({ defaultGameSlug = "raja-mantri-chor-sipahi" }: { d
                 <p className="text-xs font-black uppercase text-[#b9aa90]">Room code</p>
                 <p className="text-3xl font-black text-[#ffd58f]">{room.code}</p>
               </div>
+              <span className="rounded-full border border-[rgba(240,179,91,0.22)] px-3 py-2 text-xs font-black uppercase text-[#cdbf9f]">
+                Realtime {realtimeState}
+              </span>
               <button
                 type="button"
                 className="button-secondary focus-ring"

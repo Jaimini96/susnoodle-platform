@@ -38,6 +38,12 @@ npx wrangler deploy --config cloudflare/wrangler.realtime.jsonc
 
 The MVP Next.js API uses a local in-memory room service for development. Production realtime should route lobby websocket traffic to the Durable Object worker and store durable snapshots in D1.
 
+The browser room console reads `NEXT_PUBLIC_ROOM_WORKER_URL`. Use:
+
+```bash
+NEXT_PUBLIC_ROOM_WORKER_URL=https://susnoodle-rooms.ajaimini2.workers.dev
+```
+
 ## Useful Future Bindings
 
 - `TURNSTILE_SECRET_KEY` for bot protection on room creation
