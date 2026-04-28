@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "susnoodle-web",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-04-28",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://susnoodle.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "susnoodle",
+      "database_id": "549d726d-5a98-4dfb-8b69-c722c770c1a4"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "GAME_ASSETS",
+      "bucket_name": "susnoodle-game-assets"
+    }
+  ]
+}
