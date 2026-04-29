@@ -34,8 +34,8 @@ export const games: GameMetadata[] = [
     regions: ["Pan-India"],
     modes: ["local", "online", "practice", "tutorial"],
     status: "playable",
-    heroAsset: "/assets/games/raja-mantri-chor-sipahi.jpg",
-    thumbnailAsset: "/assets/games/raja-mantri-chor-sipahi.jpg",
+    heroAsset: "/assets/playfields/raja-mantri-table-v2.jpg",
+    thumbnailAsset: "/assets/playfields/raja-mantri-table-v2.jpg",
     accent: "#f0b35b",
     rules: [
       {
@@ -90,8 +90,8 @@ export const games: GameMetadata[] = [
     regions: ["Karnataka", "Andhra Pradesh", "Telangana", "Tamil Nadu"],
     modes: ["local", "online", "practice", "tutorial"],
     status: "playable",
-    heroAsset: "/assets/games/ashta-chamma.jpg",
-    thumbnailAsset: "/assets/games/ashta-chamma.jpg",
+    heroAsset: "/assets/playfields/ashta-chamma-board-v2.jpg",
+    thumbnailAsset: "/assets/playfields/ashta-chamma-board-v2.jpg",
     accent: "#2db7a3",
     rules: [
       {
@@ -133,8 +133,8 @@ export const games: GameMetadata[] = [
     regions: ["Regional variants"],
     modes: ["solo", "local", "practice", "tutorial"],
     status: "playable",
-    heroAsset: "/assets/games/damroo.jpg",
-    thumbnailAsset: "/assets/games/damroo.jpg",
+    heroAsset: "/assets/playfields/damroo-arena-v2.jpg",
+    thumbnailAsset: "/assets/playfields/damroo-arena-v2.jpg",
     accent: "#e7573f",
     rules: [
       {
@@ -184,8 +184,8 @@ export const games: GameMetadata[] = [
     regions: ["India"],
     modes: ["solo", "local", "practice", "tutorial"],
     status: "playable",
-    heroAsset: "/assets/games/moksha-patam.jpg",
-    thumbnailAsset: "/assets/games/moksha-patam.jpg",
+    heroAsset: "/assets/playfields/moksha-patam-board-v2.jpg",
+    thumbnailAsset: "/assets/playfields/moksha-patam-board-v2.jpg",
     accent: "#7ebf63",
     rules: [
       {
@@ -227,8 +227,8 @@ export const games: GameMetadata[] = [
     regions: ["Tamil Nadu", "Karnataka", "Andhra Pradesh", "Kerala"],
     modes: ["solo", "local", "practice", "tutorial"],
     status: "playable",
-    heroAsset: "/assets/games/pallankuzhi.jpg",
-    thumbnailAsset: "/assets/games/pallankuzhi.jpg",
+    heroAsset: "/assets/playfields/pallankuzhi-board-v2.jpg",
+    thumbnailAsset: "/assets/playfields/pallankuzhi-board-v2.jpg",
     accent: "#b97448",
     rules: [
       {
@@ -270,8 +270,8 @@ export const games: GameMetadata[] = [
     regions: ["North India", "Pan-India"],
     modes: ["tutorial"],
     status: "coming-soon",
-    heroAsset: "/assets/games/roadmap-table.jpg",
-    thumbnailAsset: "/assets/games/roadmap-table.jpg",
+    heroAsset: "/assets/playfields/pachisi-chaupar-board-v2.jpg",
+    thumbnailAsset: "/assets/playfields/pachisi-chaupar-board-v2.jpg",
     accent: "#b63852",
     rules: [
       {
@@ -377,8 +377,8 @@ export const games: GameMetadata[] = [
     regions: ["Pan-India"],
     modes: ["solo", "local", "practice", "tutorial"],
     status: "playable",
-    heroAsset: "/assets/games/gilli-danda.jpg",
-    thumbnailAsset: "/assets/games/gilli-danda.jpg",
+    heroAsset: "/assets/playfields/gilli-danda-field-v2.jpg",
+    thumbnailAsset: "/assets/playfields/gilli-danda-field-v2.jpg",
     accent: "#d89d4b",
     rules: [
       {

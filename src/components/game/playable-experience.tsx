@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { ArrowRight, Dice5, HelpCircle, RotateCcw, Sparkles } from "lucide-react";
 import { RulesDrawer } from "./rules-drawer";
 import { RoomConsole } from "./room-console";
@@ -17,6 +18,29 @@ import type { GameMetadata } from "@/games/types";
 type PlayableExperienceProps = {
   game: GameMetadata;
 };
+
+const playfieldAssets = {
+  ashta: "/assets/playfields/ashta-chamma-board-v2.jpg",
+  damroo: "/assets/playfields/damroo-arena-v2.jpg",
+  gilli: "/assets/playfields/gilli-danda-field-v2.jpg",
+  moksha: "/assets/playfields/moksha-patam-board-v2.jpg",
+  pallankuzhi: "/assets/playfields/pallankuzhi-board-v2.jpg",
+  raja: "/assets/playfields/raja-mantri-table-v2.jpg"
+} as const;
+
+const gotiStyles = ["goti--saffron", "goti--peacock", "goti--maroon", "goti--emerald"] as const;
+
+const mokshaVisualSquares = Array.from({ length: 36 }, (_, index) => {
+  const visualRow = Math.floor(index / 6);
+  const column = index % 6;
+  const rowFromBottom = 5 - visualRow;
+  const rowStart = rowFromBottom * 6 + 1;
+  return rowFromBottom % 2 === 0 ? rowStart + column : rowStart + (5 - column);
+});
+
+function playerStyle(index: number) {
+  return gotiStyles[index % gotiStyles.length];
+}
 
 export function PlayableExperience({ game }: PlayableExperienceProps) {
   const [mode, setMode] = useState<"practice" | "tutorial" | "room">("practice");
@@ -87,19 +111,29 @@ function RajaMantriPlay() {
   return (
     <section className="glass grid gap-5 rounded-lg p-5">
       <GameStatusBar title={`Round ${state.round}`} message={state.explanation} />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {state.players.map((player) => (
-          <article key={player} className="rounded-lg border border-[rgba(240,179,91,0.2)] bg-[rgba(255,255,255,0.04)] p-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-black">{player}</h3>
-              <span className="text-sm font-black text-[#ffd58f]">{state.scores[player]}</span>
-            </div>
-            <div className="mt-4 grid h-28 place-items-center rounded-md bg-[#ead2a7] text-xl font-black text-[#2a1608] shadow-inner">
-              {state.phase === "guess" ? state.roles[player] : state.roles[player]}
-            </div>
-          </article>
-        ))}
-      </div>
+      <PlaySurface
+        alt="Immersive Indian tabletop with four Raja Mantri Chor Sipahi role chits"
+        className="min-h-[420px]"
+        src={playfieldAssets.raja}
+        variant="wide"
+      >
+        <div className="role-table">
+          {state.players.map((player, index) => (
+            <article key={player} className={`role-chit role-chit--${index}`}>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-black">{player}</h3>
+                <span className="rounded-full bg-[rgba(42,22,8,0.14)] px-2 py-1 text-xs font-black text-[#5a2c18]">
+                  {state.scores[player]}
+                </span>
+              </div>
+              <div className="mt-4 grid place-items-center gap-2 text-center">
+                <span className={`role-sigil ${playerStyle(index)}`} aria-hidden="true" />
+                <span className="text-xl font-black text-[#2a1608]">{state.roles[player]}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </PlaySurface>
       {state.phase === "guess" ? (
         <div>
           <p className="mb-3 text-sm font-bold text-[#cdbf9f]">{mantri} is Mantri. Choose the suspected Chor.</p>
@@ -146,24 +180,33 @@ function MokshaPatamPlay() {
   const active = state.players[state.turn];
   return (
     <section className="glass grid gap-5 rounded-lg p-5 lg:grid-cols-[1fr_280px]">
-      <div className="grid grid-cols-6 overflow-hidden rounded-lg border border-[rgba(240,179,91,0.24)]">
-        {Array.from({ length: 36 }).map((_, index) => {
-          const square = index + 1;
-          const playersHere = state.players.filter((player) => state.positions[player] === square);
-          const link = mokshaLinks[square];
-          return (
-            <div key={square} className="relative aspect-square border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.035)] p-1">
-              <span className="text-[10px] font-bold text-[#8f826c]">{square}</span>
-              {link ? <span className="absolute right-1 top-1 text-[10px] font-black text-[#ffd58f]">{link > square ? "Up" : "Down"}</span> : null}
-              <div className="absolute bottom-1 left-1 flex gap-1">
-                {playersHere.map((player) => (
-                  <span key={player} className="token size-4" title={player} />
-                ))}
+      <PlaySurface
+        alt="Immersive Indianized Moksha Patam board with snakes and ladders"
+        src={playfieldAssets.moksha}
+        variant="square"
+      >
+        <div className="board-grid moksha-board-grid">
+          {mokshaVisualSquares.map((square) => {
+            const playersHere = state.players.filter((player) => state.positions[player] === square);
+            const link = mokshaLinks[square];
+            return (
+              <div key={square} className={`board-cell ${link ? "board-cell--linked" : ""}`}>
+                <span className="cell-number">{square}</span>
+                {link ? <span className="cell-link-label">{link > square ? "Climb" : "Slide"}</span> : null}
+                <div className="cell-tokens">
+                  {playersHere.map((player) => (
+                    <span
+                      key={player}
+                      className={`goti ${playerStyle(state.players.indexOf(player))}`}
+                      title={player}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </PlaySurface>
       <aside className="grid content-start gap-4">
         <GameStatusBar title={`${active}'s turn`} message={state.message} />
         <button type="button" className="button-primary focus-ring" disabled={Boolean(state.winner)} onClick={() => {
@@ -186,9 +229,14 @@ function PallankuzhiPlay() {
   return (
     <section className="glass grid gap-5 rounded-lg p-5">
       <GameStatusBar title={`${active}'s turn`} message={state.message} />
-      <div className="grid gap-3 rounded-[28px] border border-[rgba(240,179,91,0.24)] bg-[#6c3b21] p-4 shadow-inner">
+      <PlaySurface
+        alt="Immersive carved wooden Pallankuzhi board with fourteen pits"
+        className="pallankuzhi-surface"
+        src={playfieldAssets.pallankuzhi}
+        variant="wide"
+      >
         {[1, 0].map((side) => (
-          <div key={side} className="grid grid-cols-7 gap-2">
+          <div key={side} className="pallankuzhi-row">
             {Array.from({ length: 7 }).map((_, offset) => {
               const pitIndex = side === 0 ? offset : 13 - offset;
               const canMove = state.players[state.turn] === active && state.turn === side && state.pits[pitIndex] > 0;
@@ -201,16 +249,17 @@ function PallankuzhiPlay() {
                     play("move");
                     setState((value) => pallankuzhiModule.applyAction(value, { type: "sow", playerId: active, pitIndex }));
                   }}
-                  className="focus-ring grid aspect-square place-items-center rounded-full border border-[rgba(255,226,172,0.24)] bg-[#28160e] text-lg font-black text-[#ffd58f] shadow-inner disabled:opacity-70"
+                  className={`pit-button focus-ring ${canMove ? "pit-button--active" : ""}`}
                   aria-label={`Pit ${pitIndex + 1} with ${state.pits[pitIndex]} seeds`}
                 >
-                  {state.pits[pitIndex]}
+                  <SeedCluster count={state.pits[pitIndex]} />
+                  <span className="pit-count">{state.pits[pitIndex]}</span>
                 </button>
               );
             })}
           </div>
         ))}
-      </div>
+      </PlaySurface>
       <div className="grid gap-3 sm:grid-cols-2">
         {state.players.map((player, index) => (
           <div key={player} className="rounded-lg border border-[rgba(240,179,91,0.2)] p-4">
@@ -232,12 +281,23 @@ function DamrooPlay() {
   return (
     <section className="glass grid gap-5 rounded-lg p-5">
       <GameStatusBar title={`Beat ${Math.min(state.beat + 1, 8)} of 8`} message={state.message} />
-      <div className="grid place-items-center py-8">
-        <div className="relative size-52 rounded-full border border-[rgba(240,179,91,0.3)]">
-          <div className="absolute inset-10 rounded-full border-8 border-[#f0b35b]" />
-          <div className="absolute top-1/2 size-10 -translate-y-1/2 rounded-full bg-[#e7573f] shadow-[0_0_42px_rgba(231,87,63,0.55)]" style={{ left: `${ringPosition}%` }} />
+      <PlaySurface
+        alt="Immersive Indianized Damroo rhythm arena with circular beat target"
+        className="min-h-[360px]"
+        src={playfieldAssets.damroo}
+        variant="wide"
+      >
+        <div className="damroo-stage">
+          <div className="damroo-target" aria-hidden="true">
+            <div className="damroo-perfect-zone" />
+            <div className="damroo-beat-marker" style={{ left: `${ringPosition}%` }} />
+          </div>
+          <div className="damroo-caption">
+            <span>Sweet spot</span>
+            <strong>{Math.abs(offset) <= 130 ? "Inside rhythm" : "Drifting"}</strong>
+          </div>
         </div>
-      </div>
+      </PlaySurface>
       <label className="grid gap-2 text-sm font-bold text-[#cdbf9f]">
         Timing offset
         <input type="range" min="-220" max="220" value={offset} onChange={(event) => setOffset(Number(event.target.value))} />
@@ -279,13 +339,21 @@ function GilliDandaPlay() {
   return (
     <section className="glass grid gap-5 rounded-lg p-5">
       <GameStatusBar title={`Attempt ${Math.min(state.attempts + 1, 3)} of 3`} message={state.message} />
-      <div className="relative min-h-56 overflow-hidden rounded-lg border border-[rgba(240,179,91,0.22)] bg-[linear-gradient(180deg,rgba(49,99,66,0.26),rgba(95,51,26,0.34))]">
-        <div className="absolute bottom-14 left-12 h-4 w-44 origin-left rounded-full bg-[#b86f35]" style={{ transform: `rotate(${angle * 58 - 32}deg)` }} />
-        <div className="absolute bottom-24 left-28 h-3 w-16 rounded-full bg-[#f0b35b]" />
-        <div className="absolute right-5 top-5 rounded-lg bg-[rgba(0,0,0,0.28)] px-4 py-2 font-black text-[#ffd58f]">
+      <PlaySurface
+        alt="Immersive Indian courtyard playfield for Gilli Danda"
+        className="min-h-[340px]"
+        src={playfieldAssets.gilli}
+        variant="wide"
+      >
+        <div className="gilli-scene" aria-hidden="true">
+          <div className="gilli-trajectory" style={{ transform: `rotate(${angle * -26 - 18}deg) scaleX(${0.55 + power * 0.6})` }} />
+          <div className="gilli-danda" style={{ transform: `rotate(${angle * 58 - 32}deg)` }} />
+          <div className="gilli-stick" />
+        </div>
+        <div className="play-badge absolute right-5 top-5">
           {state.lastDistance}m
         </div>
-      </div>
+      </PlaySurface>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2 text-sm font-bold text-[#cdbf9f]">
           Lift power
@@ -325,17 +393,22 @@ function AshtaChammaPlay() {
   const legalMoves = useMemo(() => ashtaChammaModule.getAvailableActions(state, active), [active, state]);
   return (
     <section className="glass grid gap-5 rounded-lg p-5 lg:grid-cols-[1fr_280px]">
-      <div className="grid grid-cols-5 overflow-hidden rounded-lg border border-[rgba(240,179,91,0.24)]">
+      <PlaySurface
+        alt="Immersive Indianized Ashta Chamma board with cowrie shells"
+        src={playfieldAssets.ashta}
+        variant="square"
+      >
+        <div className="board-grid ashta-board-grid">
         {Array.from({ length: 25 }).map((_, square) => {
           const pathIndex = ashtaPath.indexOf(square);
           const tokensHere = state.tokens
             .map((token, tokenIndex) => ({ token, tokenIndex }))
             .filter(({ token }) => ashtaPath[token.progress] === square && !token.finished);
           return (
-            <div key={square} className="relative aspect-square border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.035)] p-1">
-              <span className="text-[10px] font-bold text-[#8f826c]">{pathIndex >= 0 ? pathIndex + 1 : ""}</span>
-              {ashtaSafeSquares.has(square) ? <Sparkles className="absolute right-1 top-1" size={12} color="var(--gold)" aria-hidden="true" /> : null}
-              <div className="absolute bottom-1 left-1 flex flex-wrap gap-1">
+            <div key={square} className={`board-cell ${pathIndex >= 0 ? "" : "board-cell--quiet"} ${ashtaSafeSquares.has(square) ? "board-cell--safe" : ""}`}>
+              <span className="cell-number">{pathIndex >= 0 ? pathIndex + 1 : ""}</span>
+              {ashtaSafeSquares.has(square) ? <Sparkles className="absolute right-1 top-1" size={13} color="var(--gold)" aria-hidden="true" /> : null}
+              <div className="cell-tokens">
                 {tokensHere.map(({ token, tokenIndex }) => {
                   const canMove = legalMoves.some((action) => action.type === "move" && action.tokenIndex === tokenIndex);
                   return (
@@ -347,7 +420,7 @@ function AshtaChammaPlay() {
                         play("move");
                         setState((value) => ashtaChammaModule.applyAction(value, { type: "move", playerId: active, tokenIndex }));
                       }}
-                      className={`token size-4 focus-ring ${token.owner === state.players[0] ? "" : "bg-[#2db7a3]"} ${canMove ? "ring-2 ring-[#ffd58f]" : ""}`}
+                      className={`goti focus-ring ${playerStyle(state.players.indexOf(token.owner))} ${canMove ? "goti--legal" : ""}`}
                       aria-label={`${token.owner} token ${tokenIndex + 1}`}
                     />
                   );
@@ -356,7 +429,8 @@ function AshtaChammaPlay() {
             </div>
           );
         })}
-      </div>
+        </div>
+      </PlaySurface>
       <aside className="grid content-start gap-4">
         <GameStatusBar title={`${active}'s turn`} message={state.message} />
         <Metric label="Cowrie throw" value={state.roll ?? "-"} />
@@ -385,6 +459,38 @@ function GameStatusBar({ title, message }: { title: string; message: string }) {
       </h2>
       <p className="mt-2 text-sm leading-6 text-[#b9aa90]">{message}</p>
     </div>
+  );
+}
+
+function PlaySurface({
+  alt,
+  children,
+  className = "",
+  src,
+  variant
+}: {
+  alt: string;
+  children: ReactNode;
+  className?: string;
+  src: string;
+  variant: "square" | "wide";
+}) {
+  return (
+    <div className={`play-surface play-surface--${variant} ${className}`}>
+      <Image alt={alt} className="play-surface__image" fill sizes="(max-width: 768px) 100vw, 760px" src={src} />
+      <div className="play-surface__shade" aria-hidden="true" />
+      <div className="play-surface__content">{children}</div>
+    </div>
+  );
+}
+
+function SeedCluster({ count }: { count: number }) {
+  return (
+    <span className="seed-cluster" aria-hidden="true">
+      {Array.from({ length: Math.min(count, 10) }).map((_, index) => (
+        <span key={index} className="seed" />
+      ))}
+    </span>
   );
 }
 

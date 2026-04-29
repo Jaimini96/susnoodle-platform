@@ -34,6 +34,17 @@ Last updated: 2026-04-29
 - Generated raster assets added:
   - `public/susnoodle-hero.jpg`
   - `public/assets/games/*.jpg`
+- Immersive image-generated playfield assets added under `public/assets/playfields/` using prompts that explicitly targeted “immersive, detailed, indianized, premium, tactile” board/game art.
+- Playable game surfaces refreshed for:
+  - Raja Mantri Chor Sipahi role table
+  - Ashta Chamma / Chowka Bara board
+  - Damroo rhythm arena
+  - Moksha Patam / Saanp Seedhi board
+  - Pallankuzhi / Ali Guli Mane board
+  - Gilli Danda courtyard
+- Chaupar / Pachisi roadmap art added as a stronger future-game board asset.
+- Game renderers upgraded with tactile gotis, seed clusters, clearer board labels, timing rings, and trajectory overlays layered over the generated playfields.
+- Catalog and game detail artwork now use the upgraded playfield assets for the refreshed games.
 - SEO basics added:
   - metadata titles and descriptions
   - canonical URLs
@@ -85,9 +96,11 @@ Last updated: 2026-04-29
 6. Add stronger tutorial flows per game, including “why did this happen?” explanations.
 7. Add accessible keyboard controls for every playable board action.
 8. Add low-bandwidth asset mode and image loading tests.
-9. Add admin/config editor for game metadata.
-10. Add proper regional rule variant support per game.
-11. Add more playable games from the roadmap:
+9. Generate custom immersive playfields for the remaining roadmap-only games when each module is scoped.
+10. Add token/cowrie/marble sprite sheets for richer micro-animations.
+11. Add admin/config editor for game metadata.
+12. Add proper regional rule variant support per game.
+13. Add more playable games from the roadmap:
     - Chaupar / Pachisi
     - Kanche / Marbles
     - Navakankari
@@ -97,7 +110,13 @@ Last updated: 2026-04-29
 
 ## Immediate Recommended Next Steps
 
-1. Push the latest CI/realtime/tracker commit to GitHub.
+1. Review the upgraded playable pages locally:
+   - `/games/moksha-patam`
+   - `/games/ashta-chamma`
+   - `/games/pallankuzhi`
+   - `/games/damroo`
+   - `/games/gilli-danda`
+   - `/games/raja-mantri-chor-sipahi`
 2. Connect `susnoodle.com` to `susnoodle-web` in Cloudflare.
 3. Add production environment variable:
    - `NEXT_PUBLIC_ROOM_WORKER_URL=https://susnoodle-rooms.ajaimini2.workers.dev`
