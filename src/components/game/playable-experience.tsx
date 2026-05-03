@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
-import { ArrowRight, Dice5, HelpCircle, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowRight, Crown, Dice5, HelpCircle, RotateCcw, ScrollText, Shield, Sparkles, Timer, Trophy, UserRound, Users, Volume2, VolumeX } from "lucide-react";
 import { RulesDrawer } from "./rules-drawer";
 import { RoomConsole } from "./room-console";
 import { useGameSound } from "./sound-provider";
@@ -12,7 +12,7 @@ import { damrooModule } from "@/games/modules/damroo";
 import { gilliDandaModule } from "@/games/modules/gilli-danda";
 import { mokshaLinks, mokshaPatamModule } from "@/games/modules/moksha-patam";
 import { pallankuzhiModule } from "@/games/modules/pallankuzhi";
-import { rajaMantriModule } from "@/games/modules/raja-mantri";
+import { rajaMantriModule, rajaRoleScores, type RajaRole } from "@/games/modules/raja-mantri";
 import type { GameMetadata } from "@/games/types";
 
 type PlayableExperienceProps = {
@@ -25,7 +25,7 @@ const playfieldAssets = {
   gilli: "/assets/playfields/gilli-danda-field-v2.jpg",
   moksha: "/assets/playfields/moksha-patam-board-v2.jpg",
   pallankuzhi: "/assets/playfields/pallankuzhi-board-v2.jpg",
-  raja: "/assets/playfields/raja-mantri-table-v2.jpg"
+  raja: "/assets/playfields/raja-mantri-court-v3.jpg"
 } as const;
 
 const gotiStyles = ["goti--saffron", "goti--peacock", "goti--maroon", "goti--emerald"] as const;
@@ -37,6 +37,29 @@ const mokshaVisualSquares = Array.from({ length: 36 }, (_, index) => {
   const rowStart = rowFromBottom * 6 + 1;
   return rowFromBottom % 2 === 0 ? rowStart + column : rowStart + (5 - column);
 });
+
+const rajaRoleInfo: Record<RajaRole, { guidance: string; mission: string; tone: string }> = {
+  Raja: {
+    guidance: "Lead the court. Your score is steady, but your Mantri needs a clean read.",
+    mission: "Trust the Mantri and watch who overacts.",
+    tone: "raja"
+  },
+  Mantri: {
+    guidance: "You control the accusation. Pick the player you believe is Chor.",
+    mission: "Listen for shaky stories, then name one suspect.",
+    tone: "mantri"
+  },
+  Sipahi: {
+    guidance: "Protect the court. You score if the round resolves, but your table talk can help.",
+    mission: "Pressure the suspicious players without giving away too much.",
+    tone: "sipahi"
+  },
+  Chor: {
+    guidance: "Stay calm. If the Mantri misses, you steal a heavy score swing.",
+    mission: "Blend in, redirect suspicion, and survive the accusation.",
+    tone: "chor"
+  }
+};
 
 function playerStyle(index: number) {
   return gotiStyles[index % gotiStyles.length];
@@ -103,73 +126,226 @@ function PracticeRenderer({ slug, game }: { slug: string; game: GameMetadata }) 
 }
 
 function RajaMantriPlay() {
-  const { play } = useGameSound();
-  const [state, setState] = useState(() => rajaMantriModule.createInitialState());
+  const initialState = useMemo(() => rajaMantriModule.createInitialState(), []);
+  const { ambient, enabled, play, startAmbient, stopAmbient, toggle } = useGameSound();
+  const [state, setState] = useState(initialState);
   const mantri = state.players.find((player) => state.roles[player] === "Mantri") ?? state.players[0];
+  const chor = state.players.find((player) => state.roles[player] === "Chor") ?? state.players[0];
+  const [viewer, setViewer] = useState(mantri);
+  const viewerRole = state.roles[viewer];
+  const viewerInfo = rajaRoleInfo[viewerRole];
   const result = rajaMantriModule.getResult(state);
+  const leaderScore = Math.max(...Object.values(state.scores));
+  const sortedPlayers = [...state.players].sort((left, right) => state.scores[right] - state.scores[left]);
+  const suspects = state.players.filter((player) => player !== mantri);
+  const progress = Math.min(100, Math.round((leaderScore / state.targetScore) * 100));
+
+  useEffect(() => {
+    if (!enabled) return;
+    startAmbient("raja-court");
+    return () => stopAmbient();
+  }, [enabled, startAmbient, stopAmbient]);
+
+  function handleSelectViewer(player: string) {
+    play("tap");
+    setViewer(player);
+  }
+
+  function handleAccuse(suspectId: string) {
+    play("accuse");
+    const next = rajaMantriModule.applyAction(state, { type: "guess", playerId: mantri, suspectId });
+    setState(next);
+    setViewer(mantri);
+    window.setTimeout(() => play("reveal"), 160);
+  }
+
+  function handleNextRound() {
+    play("round");
+    const next = rajaMantriModule.applyAction(state, { type: "new-round" });
+    setState(next);
+    setViewer(next.players.find((player) => next.roles[player] === "Mantri") ?? next.players[0]);
+  }
+
+  function handleNewMatch() {
+    play("deal");
+    const next = rajaMantriModule.createInitialState({ seed: `raja-${Date.now()}` });
+    setState(next);
+    setViewer(next.players.find((player) => next.roles[player] === "Mantri") ?? next.players[0]);
+  }
 
   return (
-    <section className="glass grid gap-5 rounded-lg p-5">
-      <GameStatusBar title={`Round ${state.round}`} message={state.explanation} />
-      <PlaySurface
-        alt="Immersive Indian tabletop with four Raja Mantri Chor Sipahi role chits"
-        className="min-h-[420px]"
-        src={playfieldAssets.raja}
-        variant="wide"
-      >
-        <div className="role-table">
-          {state.players.map((player, index) => (
-            <article key={player} className={`role-chit role-chit--${index}`}>
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="font-black">{player}</h3>
-                <span className="rounded-full bg-[rgba(42,22,8,0.14)] px-2 py-1 text-xs font-black text-[#5a2c18]">
-                  {state.scores[player]}
-                </span>
-              </div>
-              <div className="mt-4 grid place-items-center gap-2 text-center">
-                <span className={`role-sigil ${playerStyle(index)}`} aria-hidden="true" />
-                <span className="text-xl font-black text-[#2a1608]">{state.roles[player]}</span>
-              </div>
-            </article>
-          ))}
-        </div>
-      </PlaySurface>
-      {state.phase === "guess" ? (
+    <section className="raja-room-shell">
+      <div className="raja-room-header">
         <div>
-          <p className="mb-3 text-sm font-bold text-[#cdbf9f]">{mantri} is Mantri. Choose the suspected Chor.</p>
-          <div className="grid gap-2 sm:grid-cols-3">
-            {state.players
-              .filter((player) => player !== mantri)
-              .map((player) => (
+          <p className="eyebrow mb-2">Classic pass-and-play court</p>
+          <h2 className="display text-3xl font-black text-[#fff2d8]">Raja Mantri Chor Sipahi</h2>
+        </div>
+        <button type="button" className="button-secondary focus-ring" onClick={toggle}>
+          {enabled ? <Volume2 size={17} aria-hidden="true" /> : <VolumeX size={17} aria-hidden="true" />}
+          {enabled ? "Soundscape On" : "Enable Sound"}
+        </button>
+      </div>
+
+      <div className="raja-room-stage">
+        <Image
+          alt="Immersive Indian royal courtyard for Raja Mantri Chor Sipahi"
+          className="raja-room-bg"
+          fill
+          priority
+          sizes="(max-width: 768px) 100vw, 1180px"
+          src={playfieldAssets.raja}
+        />
+        <div className="raja-room-shade" aria-hidden="true" />
+
+        <aside className="raja-side-card raja-match-card">
+          <p className="text-sm text-[#b9aa90]">Room ID</p>
+          <div className="mt-1 flex items-center justify-between gap-3">
+            <strong className="text-2xl text-[#ffd58f]">RMCS7824</strong>
+            <span className="rounded-full border border-[rgba(240,179,91,0.28)] px-2 py-1 text-xs font-black text-[#cdbf9f]">
+              Local
+            </span>
+          </div>
+          <RajaMeta icon={<Users size={17} />} label="Players" value={`${state.players.length} / 4`} />
+          <RajaMeta icon={<Timer size={17} />} label="Round" value={`${state.round} / ${state.roundLimit}`} />
+          <RajaMeta icon={<Trophy size={17} />} label="Win condition" value={`First to ${state.targetScore}`} />
+          <div className="mt-4">
+            <div className="mb-2 flex items-center justify-between text-xs font-black uppercase text-[#9f927b]">
+              <span>Leader pace</span>
+              <span>{leaderScore}</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-[rgba(255,255,255,0.08)]">
+              <span className="block h-full rounded-full bg-[#f0b35b]" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+        </aside>
+
+        <main className="raja-court-card">
+          <div className={`raja-role-toast raja-role-toast--${viewerInfo.tone}`}>
+            <RajaRoleIcon role={viewerRole} />
+            <div>
+              <p>You are the {viewerRole}</p>
+              <span>{viewerInfo.mission}</span>
+            </div>
+          </div>
+
+          <div className="raja-seat-ring" aria-label="Player seats">
+            {state.players.map((player, index) => {
+              const role = state.roles[player];
+              const revealed = state.phase === "result" || state.phase === "finished" || player === viewer;
+              const isGuessed = state.guess === player;
+              const isTrueChor = state.phase === "result" && player === chor;
+              return (
                 <button
                   key={player}
                   type="button"
-                  className="button-secondary focus-ring"
-                  onClick={() => {
-                    play("success");
-                    setState((value) => rajaMantriModule.applyAction(value, { type: "guess", playerId: mantri, suspectId: player }));
-                  }}
+                  className={`raja-seat raja-seat--${index} ${viewer === player ? "raja-seat--selected" : ""} ${isGuessed ? "raja-seat--accused" : ""} ${isTrueChor ? "raja-seat--true-chor" : ""}`}
+                  onClick={() => handleSelectViewer(player)}
+                  aria-label={`View ${player}'s role`}
                 >
-                  Accuse {player}
+                  <span className={`goti ${playerStyle(index)}`} aria-hidden="true" />
+                  <strong>{player}</strong>
+                  <small>{revealed ? role : "Hidden"}</small>
                 </button>
-              ))}
+              );
+            })}
           </div>
+
+          <div className="raja-role-console">
+            <div>
+              <p className="eyebrow mb-2">Your role</p>
+              <div className="flex items-center gap-3">
+                <RajaRoleIcon role={viewerRole} />
+                <strong className={`raja-role-name raja-role-name--${viewerInfo.tone}`}>{viewerRole}</strong>
+              </div>
+              <p className="mt-3 leading-7 text-[#e6d7bb]">{viewerInfo.guidance}</p>
+              <p className="mt-3 text-sm font-bold text-[#ffd58f]">
+                Base score: {viewerRole === "Chor" ? "0 if caught, 800 if missed" : rajaRoleScores[viewerRole]}
+              </p>
+            </div>
+            <div className="raja-role-divider" />
+            <div>
+              <p className="eyebrow mb-2">Round status</p>
+              <p className="leading-7 text-[#e6d7bb]">{state.explanation}</p>
+              {state.lastOutcome ? (
+                <p className="mt-3 text-sm font-bold text-[#ffd58f]">
+                  {state.lastOutcome.correct ? "Clean catch." : "Wrong suspect."} Chor: {state.lastOutcome.chorId}.
+                </p>
+              ) : (
+                <p className="mt-3 text-sm font-bold text-[#ffd58f]">Mantri controls the accusation in practice mode.</p>
+              )}
+            </div>
+          </div>
+        </main>
+
+        <aside className="raja-side-card raja-player-card">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-black">Players ({state.players.length}/4)</h3>
+            <span className={`raja-live-dot ${ambient ? "raja-live-dot--on" : ""}`} aria-hidden="true" />
+          </div>
+          <div className="mt-4 grid gap-2">
+            {sortedPlayers.map((player) => {
+              const role = state.roles[player];
+              const revealed = state.phase === "result" || state.phase === "finished" || player === viewer;
+              return (
+                <button
+                  key={player}
+                  type="button"
+                  className={`raja-roster-row ${viewer === player ? "raja-roster-row--active" : ""}`}
+                  onClick={() => handleSelectViewer(player)}
+                >
+                  <span className={`goti ${playerStyle(state.players.indexOf(player))}`} aria-hidden="true" />
+                  <span>
+                    <strong>{player}{player === viewer ? " (You)" : ""}</strong>
+                    <small>{revealed ? role : "Role hidden"} · +{state.lastOutcome?.awarded[player] ?? 0} this round</small>
+                  </span>
+                  <b>{state.scores[player]}</b>
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+      </div>
+
+      <div className="raja-action-dock">
+        <div>
+          <p className="text-sm font-bold text-[#cdbf9f]">
+            {state.phase === "guess" ? `${mantri} is Mantri. Accuse one suspect.` : "Reveal is complete. Decide the next step."}
+          </p>
+          {result ? <p className="mt-1 text-sm text-[#9f927b]">{result.summary}</p> : null}
         </div>
-      ) : null}
-      {state.phase === "result" ? (
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <button type="button" className="button-primary focus-ring flex-1" onClick={() => {
-            play("move");
-            setState((value) => rajaMantriModule.applyAction(value, { type: "new-round" }));
-          }}>
-            Next Round <ArrowRight size={16} aria-hidden="true" />
-          </button>
-          <button type="button" className="button-secondary focus-ring flex-1" onClick={() => setState((value) => rajaMantriModule.applyAction(value, { type: "finish" }))}>
-            Finish Match
-          </button>
-        </div>
-      ) : null}
-      {result ? <ResultPanel summary={result.summary} /> : null}
+
+        {state.phase === "guess" ? (
+          <div className="raja-accuse-grid">
+            {suspects.map((player) => (
+              <button key={player} type="button" className="button-secondary focus-ring" onClick={() => handleAccuse(player)}>
+                Accuse {player}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="raja-accuse-grid">
+            {result ? (
+              <button type="button" className="button-primary focus-ring" onClick={handleNewMatch}>
+                New Match <RotateCcw size={16} aria-hidden="true" />
+              </button>
+            ) : (
+              <button type="button" className="button-primary focus-ring" onClick={handleNextRound}>
+                Next Round <ArrowRight size={16} aria-hidden="true" />
+              </button>
+            )}
+            <button
+              type="button"
+              className="button-secondary focus-ring"
+              onClick={() => {
+                play("move");
+                setState((value) => rajaMantriModule.applyAction(value, { type: "finish" }));
+              }}
+            >
+              Finish Match
+            </button>
+          </div>
+        )}
+      </div>
     </section>
   );
 }
@@ -449,6 +625,24 @@ function AshtaChammaPlay() {
       </aside>
     </section>
   );
+}
+
+function RajaMeta({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+  return (
+    <div className="raja-meta-row">
+      <span aria-hidden="true">{icon}</span>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function RajaRoleIcon({ role }: { role: RajaRole }) {
+  const className = `raja-role-icon raja-role-icon--${rajaRoleInfo[role].tone}`;
+  if (role === "Raja") return <Crown className={className} size={24} aria-hidden="true" />;
+  if (role === "Mantri") return <ScrollText className={className} size={24} aria-hidden="true" />;
+  if (role === "Sipahi") return <Shield className={className} size={24} aria-hidden="true" />;
+  return <UserRound className={className} size={24} aria-hidden="true" />;
 }
 
 function GameStatusBar({ title, message }: { title: string; message: string }) {

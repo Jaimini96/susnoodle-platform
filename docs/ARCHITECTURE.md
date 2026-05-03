@@ -42,5 +42,6 @@ Sound cues are synthesized with the Web Audio API in `src/components/game/sound-
 
 - Sound is off by default.
 - Users must enable it with the header toggle.
-- Cues are tied to actions such as roll, move, tap, success, and miss.
+- Cues are tied to actions such as roll, move, tap, success, miss, deal, accuse, reveal, and round transitions.
+- Raja Mantri Chor Sipahi uses a soft synthesized court ambience after sound is enabled; this stays user-triggered to respect browser autoplay rules.
 - No gameplay information is sound-only.

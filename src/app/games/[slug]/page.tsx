@@ -38,6 +38,7 @@ export default async function GamePage({ params }: PageProps) {
   const { slug } = await params;
   const game = getGameBySlug(slug);
   if (!game) notFound();
+  const cinematicGame = game.slug === "raja-mantri-chor-sipahi";
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -56,34 +57,47 @@ export default async function GamePage({ params }: PageProps) {
       <Link href="/games" className="button-ghost focus-ring mb-6">
         <ArrowLeft size={16} aria-hidden="true" /> Games
       </Link>
-      <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-        <div className="grid gap-5">
-          <GamePreviewArt game={game} />
-          <div className="glass rounded-lg p-5">
-            <p className="eyebrow mb-3">{game.status === "playable" ? "Playable now" : "Catalog roadmap"}</p>
-            <h1 className="display text-4xl font-black leading-tight text-[#fff2d8]">{game.title}</h1>
-            <p className="mt-4 text-lg leading-8 text-[#cdbf9f]">{game.longDescription}</p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {game.alternateNames.map((name) => (
-                <span key={name} className="rounded-full border border-[rgba(240,179,91,0.24)] px-3 py-1 text-sm text-[#cdbf9f]">
-                  {name}
-                </span>
-              ))}
-            </div>
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <InfoPill icon={<Users size={16} />} label={`${game.minPlayers}-${game.maxPlayers} players`} />
-              <InfoPill icon={<Clock size={16} />} label={`${game.estimatedMinutes} minutes`} />
-              <InfoPill icon={<MapPin size={16} />} label={game.regions[0] ?? "India"} />
-            </div>
-          </div>
-          <article className="glass rounded-lg p-5">
-            <h2 className="mb-3 text-xl font-black">Cultural note</h2>
-            <p className="leading-7 text-[#b9aa90]">{game.culturalNote}</p>
-          </article>
+      {cinematicGame ? (
+        <div className="grid gap-8">
+          <GameIntro game={game} wide />
+          <PlayableExperience game={game} />
         </div>
-        <PlayableExperience game={game} />
-      </div>
+      ) : (
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <GameIntro game={game} />
+          <PlayableExperience game={game} />
+        </div>
+      )}
     </section>
+  );
+}
+
+function GameIntro({ game, wide = false }: { game: NonNullable<ReturnType<typeof getGameBySlug>>; wide?: boolean }) {
+  return (
+    <div className={`grid gap-5 ${wide ? "lg:grid-cols-[0.8fr_1fr] lg:items-stretch" : ""}`}>
+      <GamePreviewArt game={game} />
+      <div className="glass rounded-lg p-5">
+        <p className="eyebrow mb-3">{game.status === "playable" ? "Playable now" : "Catalog roadmap"}</p>
+        <h1 className="display text-4xl font-black leading-tight text-[#fff2d8]">{game.title}</h1>
+        <p className="mt-4 text-lg leading-8 text-[#cdbf9f]">{game.longDescription}</p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {game.alternateNames.map((name) => (
+            <span key={name} className="rounded-full border border-[rgba(240,179,91,0.24)] px-3 py-1 text-sm text-[#cdbf9f]">
+              {name}
+            </span>
+          ))}
+        </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <InfoPill icon={<Users size={16} />} label={`${game.minPlayers}-${game.maxPlayers} players`} />
+          <InfoPill icon={<Clock size={16} />} label={`${game.estimatedMinutes} minutes`} />
+          <InfoPill icon={<MapPin size={16} />} label={game.regions[0] ?? "India"} />
+        </div>
+        <article className="mt-5 border-t border-[rgba(240,179,91,0.16)] pt-5">
+          <h2 className="mb-3 text-xl font-black">Cultural note</h2>
+          <p className="leading-7 text-[#b9aa90]">{game.culturalNote}</p>
+        </article>
+      </div>
+    </div>
   );
 }
 

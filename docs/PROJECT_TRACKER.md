@@ -1,6 +1,6 @@
 # SusNoodle Project Tracker
 
-Last updated: 2026-04-29
+Last updated: 2026-05-03
 
 ## Live Links
 
@@ -45,6 +45,13 @@ Last updated: 2026-04-29
 - Chaupar / Pachisi roadmap art added as a stronger future-game board asset.
 - Game renderers upgraded with tactile gotis, seed clusters, clearer board labels, timing rings, and trajectory overlays layered over the generated playfields.
 - Catalog and game detail artwork now use the upgraded playfield assets for the refreshed games.
+- Raja Mantri Chor Sipahi focused polish pass completed:
+  - New image-generated royal court background: `public/assets/playfields/raja-mantri-court-v3.jpg`.
+  - Wider cinematic game-page layout for Raja.
+  - Room-style UI inspired by the provided reference: room details, player roster, role banner, score target, central court, and action dock.
+  - Feasible classic rules implemented: Mantri accuses one suspect, Chor escapes on a wrong guess, first to 3000 or 5 rounds wins.
+  - Raja-specific Web Audio cues added for deal, accusation, reveal, and round transition.
+  - Soft synthesized Raja court ambience added after user enables sound.
 - SEO basics added:
   - metadata titles and descriptions
   - canonical URLs
@@ -98,9 +105,11 @@ Last updated: 2026-04-29
 8. Add low-bandwidth asset mode and image loading tests.
 9. Generate custom immersive playfields for the remaining roadmap-only games when each module is scoped.
 10. Add token/cowrie/marble sprite sheets for richer micro-animations.
-11. Add admin/config editor for game metadata.
-12. Add proper regional rule variant support per game.
-13. Add more playable games from the roadmap:
+11. Add richer Raja online-room flow that maps the room roster to real connected guests instead of practice players.
+12. Add private pass-and-play role reveal masking for in-person use.
+13. Add admin/config editor for game metadata.
+14. Add proper regional rule variant support per game.
+15. Add more playable games from the roadmap:
     - Chaupar / Pachisi
     - Kanche / Marbles
     - Navakankari

@@ -34,8 +34,8 @@ export const games: GameMetadata[] = [
     regions: ["Pan-India"],
     modes: ["local", "online", "practice", "tutorial"],
     status: "playable",
-    heroAsset: "/assets/playfields/raja-mantri-table-v2.jpg",
-    thumbnailAsset: "/assets/playfields/raja-mantri-table-v2.jpg",
+    heroAsset: "/assets/playfields/raja-mantri-court-v3.jpg",
+    thumbnailAsset: "/assets/playfields/raja-mantri-court-v3.jpg",
     accent: "#f0b35b",
     rules: [
       {
@@ -49,6 +49,10 @@ export const games: GameMetadata[] = [
       {
         title: "Scoring",
         body: "Default scoring: Raja 1000, Mantri 800 if correct or 0 if wrong, Sipahi 500, Chor 0 if caught or 800 if the Mantri misses."
+      },
+      {
+        title: "Match Target",
+        body: "Practice mode plays up to 5 rounds or until someone reaches 3000 points. The highest score leads the court."
       }
     ],
     tutorial: [

@@ -612,6 +612,326 @@ select {
   font-weight: 900;
 }
 
+.raja-room-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.raja-room-header,
+.raja-action-dock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid rgba(240, 179, 91, 0.22);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    rgba(11, 9, 7, 0.78);
+  padding: 1rem;
+  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.3);
+}
+
+.raja-room-stage {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(210px, 0.72fr) minmax(420px, 1.8fr) minmax(250px, 0.9fr);
+  gap: 1rem;
+  min-height: 690px;
+  overflow: hidden;
+  border: 1px solid rgba(240, 179, 91, 0.24);
+  border-radius: 8px;
+  background: #060606;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.raja-room-bg {
+  z-index: -3;
+  object-fit: cover;
+}
+
+.raja-room-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 51% 48%, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.4) 64%, rgba(0, 0, 0, 0.72) 100%),
+    linear-gradient(90deg, rgba(4, 4, 4, 0.78), rgba(4, 4, 4, 0.18) 36%, rgba(4, 4, 4, 0.68));
+}
+
+.raja-side-card,
+.raja-court-card {
+  border: 1px solid rgba(240, 179, 91, 0.24);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018)),
+    rgba(8, 7, 6, 0.68);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 226, 172, 0.04),
+    0 24px 54px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(14px);
+}
+
+.raja-side-card {
+  align-self: stretch;
+  padding: 1rem;
+}
+
+.raja-match-card {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
+.raja-meta-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.55rem;
+  border-top: 1px solid rgba(240, 179, 91, 0.14);
+  padding-top: 1rem;
+  color: #cdbf9f;
+}
+
+.raja-meta-row span:first-child {
+  color: #f0b35b;
+  grid-row: span 2;
+  margin-top: 0.1rem;
+}
+
+.raja-meta-row strong {
+  color: #ffd58f;
+  line-height: 1.35;
+}
+
+.raja-court-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 650px;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.raja-role-toast {
+  justify-self: center;
+  display: flex;
+  max-width: min(100%, 420px);
+  align-items: center;
+  gap: 0.8rem;
+  border: 1px solid rgba(240, 179, 91, 0.34);
+  border-radius: 8px;
+  background: rgba(7, 6, 5, 0.72);
+  padding: 0.85rem 1rem;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.34);
+}
+
+.raja-role-toast p {
+  color: #ffd58f;
+  font-weight: 900;
+}
+
+.raja-role-toast span {
+  display: block;
+  margin-top: 0.15rem;
+  color: #e6d7bb;
+  font-size: 0.86rem;
+}
+
+.raja-role-icon {
+  flex: 0 0 auto;
+  color: #f0b35b;
+  filter: drop-shadow(0 0 12px rgba(240, 179, 91, 0.28));
+}
+
+.raja-role-icon--mantri {
+  color: #35c6d0;
+}
+
+.raja-role-icon--sipahi {
+  color: #74c66a;
+}
+
+.raja-role-icon--chor {
+  color: #e45f71;
+}
+
+.raja-seat-ring {
+  position: relative;
+  min-height: 390px;
+}
+
+.raja-seat {
+  position: absolute;
+  display: grid;
+  min-width: 146px;
+  justify-items: center;
+  gap: 0.25rem;
+  border: 1px solid rgba(240, 179, 91, 0.22);
+  border-radius: 8px;
+  background: rgba(7, 6, 5, 0.64);
+  color: #f8ecd4;
+  padding: 0.75rem;
+  text-align: center;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.26);
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.raja-seat:hover,
+.raja-seat--selected {
+  border-color: rgba(255, 213, 143, 0.72);
+  box-shadow:
+    0 0 0 2px rgba(240, 179, 91, 0.18),
+    0 22px 48px rgba(0, 0, 0, 0.32);
+}
+
+.raja-seat--accused {
+  border-color: rgba(231, 87, 63, 0.72);
+}
+
+.raja-seat--true-chor {
+  box-shadow:
+    0 0 0 2px rgba(231, 87, 63, 0.36),
+    0 0 34px rgba(231, 87, 63, 0.28);
+}
+
+.raja-seat strong {
+  font-size: 0.95rem;
+}
+
+.raja-seat small {
+  color: #ffd58f;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.raja-seat--0 {
+  left: 50%;
+  top: 10%;
+  transform: translateX(-50%);
+}
+
+.raja-seat--1 {
+  left: 3%;
+  top: 48%;
+  transform: translateY(-50%);
+}
+
+.raja-seat--2 {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.raja-seat--3 {
+  right: 3%;
+  top: 48%;
+  transform: translateY(-50%);
+}
+
+.raja-role-console {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) auto minmax(0, 1.05fr);
+  gap: 1.2rem;
+  align-items: stretch;
+  border: 1px solid rgba(240, 179, 91, 0.32);
+  border-radius: 8px;
+  background: rgba(7, 6, 5, 0.72);
+  padding: 1.1rem;
+}
+
+.raja-role-divider {
+  width: 1px;
+  background: rgba(240, 179, 91, 0.18);
+}
+
+.raja-role-name {
+  font-size: clamp(1.55rem, 4vw, 2.15rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.raja-role-name--raja {
+  color: #ffd58f;
+}
+
+.raja-role-name--mantri {
+  color: #7ee8ee;
+}
+
+.raja-role-name--sipahi {
+  color: #b7efad;
+}
+
+.raja-role-name--chor {
+  color: #ff8da0;
+}
+
+.raja-player-card {
+  min-width: 0;
+}
+
+.raja-live-dot {
+  width: 13px;
+  aspect-ratio: 1;
+  border: 2px solid rgba(185, 170, 144, 0.5);
+  border-radius: 999px;
+}
+
+.raja-live-dot--on {
+  border-color: #69ef7c;
+  box-shadow: 0 0 18px rgba(105, 239, 124, 0.5);
+}
+
+.raja-roster-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.055);
+  color: #f8ecd4;
+  padding: 0.7rem;
+  text-align: left;
+}
+
+.raja-roster-row--active {
+  border-color: rgba(255, 213, 143, 0.55);
+  background: rgba(240, 179, 91, 0.1);
+}
+
+.raja-roster-row strong,
+.raja-roster-row small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.raja-roster-row small {
+  margin-top: 0.1rem;
+  color: #b9aa90;
+  font-size: 0.75rem;
+}
+
+.raja-roster-row b {
+  color: #ffd58f;
+}
+
+.raja-accuse-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(130px, 1fr));
+  gap: 0.6rem;
+  min-width: min(100%, 520px);
+}
+
 @keyframes legal-pulse {
   0%,
   100% {
@@ -629,6 +949,56 @@ select {
 }
 
 @media (max-width: 720px) {
+  .raja-room-header,
+  .raja-action-dock {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .raja-room-stage {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 0.75rem;
+  }
+
+  .raja-room-shade {
+    background:
+      radial-gradient(circle at 50% 28%, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.58) 62%, rgba(0, 0, 0, 0.84)),
+      linear-gradient(180deg, rgba(4, 4, 4, 0.3), rgba(4, 4, 4, 0.74));
+  }
+
+  .raja-court-card {
+    min-height: 0;
+  }
+
+  .raja-seat-ring {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    min-height: 0;
+    padding-block: 1rem;
+  }
+
+  .raja-seat {
+    position: static;
+    min-width: 0;
+    transform: none;
+  }
+
+  .raja-role-console {
+    grid-template-columns: 1fr;
+  }
+
+  .raja-role-divider {
+    width: 100%;
+    height: 1px;
+  }
+
+  .raja-accuse-grid {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
   .play-surface--wide {
     min-height: 300px;
   }
